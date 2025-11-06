@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Churrasco</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
+        <img src="{{ image_url }}" alt="Churrasco" class="w-full h-48 object-cover rounded-t-lg">
+        <div class="flex w-full h-1 rounded-t-lg overflow-hidden">
+            <div class="w-1/4 h-full" style="background-color: #4285F4;"></div>
+            <div class="w-1/4 h-full" style="background-color: #DB4437;"></div>
+            <div class="w-1/4 h-full" style="background-color: #F4B400;"></div>
+            <div class="w-1/4 h-full" style="background-color: #0F9D58;"></div>
+        </div>
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6 pt-6">Calculadora de Churrasco</h1>
+        <div class="space-y-4">
+            <div>
+                <label for="men" class="block text-sm font-medium text-gray-700">Homens:</label>
+                <input type="number" id="men" name="men" min="0" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="women" class="block text-sm font-medium text-gray-700">Mulheres:</label>
+                <input type="number" id="women" name="women" min="0" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="children" class="block text-sm font-medium text-gray-700">Crianças:</label>
+                <input type="number" id="children" name="children" min="0" value="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+        </div>
+
+        <div id="results" class="mt-6 space-y-2 text-lg"></div>
+
+        <div class="mt-6">
+             <a id="whatsapp-share-btn" href="#" target="_blank" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700">
+                <svg class="w-5 h-5 mr-3" fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path clip-rule="evenodd" fill-rule="evenodd" d="M18.425 5.575a9.952 9.952 0 00-12.85 12.85L3 21l2.575-2.575a9.952 9.952 0 0012.85-12.85zM12 3.001a8.953 8.953 0 11-8.953 8.953A8.962 8.962 0 0112 3.001zM15.6 14.113c-.15-.075-1.012-.5-1.162-.55-.15-.05-.263-.075-.375.075-.113.15-.438.55-.538.663-.1.112-.2.124-.35.05-.15-.075-.637-.237-1.212-.75-.45-.387-.75-.862-.837-1.012-.088-.15-.013-.238.063-.313.062-.062.15-.174.224-.262.075-.088.1-.15.15-.25.05-.1.025-.188-.013-.263-.037-.075-.375-.9-.525-1.225-.15-.325-.3-.275-.412-.275-.113 0-.25 0-.375 0-.125 0-.325.05-.5.25-.175.2-.663.65-.663 1.575 0 .925.688 1.825.788 1.95.1.125 1.337 2.038 3.237 2.85.475.2.838.325 1.125.412.288.088.55.075.763-.05.237-.125 1.012-.612 1.15-1.2.138-.587.138-1.087.1-1.187-.05-.1-.162-.15-.312-.225z"></path>
+                </svg>
+                Compartilhar no WhatsApp
+            </a>
+        </div>
+
+        <script>
+            const menInput = document.getElementById('men');
+            const womenInput = document.getElementById('women');
+            const childrenInput = document.getElementById('children');
+            const resultsDiv = document.getElementById('results');
+            const shareButton = document.getElementById('whatsapp-share-btn');
+
+            // A truly robust URL encoding function that correctly handles emojis.
+            function robustEncodeURIComponent(str) {
+                const utf8Bytes = new TextEncoder().encode(str);
+                let encodedString = '';
+                for (let i = 0; i < utf8Bytes.length; i++) {
+                    const byte = utf8Bytes[i];
+                    // Keep URL-safe characters as-is
+                    if (
+                        (byte >= 0x41 && byte <= 0x5A) || // A-Z
+                        (byte >= 0x61 && byte <= 0x7A) || // a-z
+                        (byte >= 0x30 && byte <= 0x39) || // 0-9
+                        byte === 0x2D || // -
+                        byte === 0x2E || // .
+                        byte === 0x5F || // _
+                        byte === 0x7E    // ~
+                    ) {
+                        encodedString += String.fromCharCode(byte);
+                    } else {
+                        // Percent-encode all other characters
+                        encodedString += '%' + byte.toString(16).toUpperCase().padStart(2, '0');
+                    }
+                }
+                return encodedString;
+            }
+
+            function calculateAndShare() {
+                const men = parseInt(menInput.value) || 0;
+                const women = parseInt(womenInput.value) || 0;
+                const children = parseInt(childrenInput.value) || 0;
+
+                const totalPicanha = ((men * 400) + (women * 300) + (children * 200)) / 1000;
+                const totalCostela = ((men * 150) + (women * 150) + (children * 100)) / 1000;
+                const totalPaoComLinguica = (men * 1) + (women * 1) + (children * 0.5);
+                const totalBeer = (men * 2) + (women * 1);
+                const totalSoda = (men * 0.5) + (women * 0.5) + (children * 0.5);
+
+                const meatEmoji = '\uD83E\uDD69';
+                const ribsEmoji = '\uD83C\uDF56';
+                const sausageBreadEmoji = '\uD83C\uDF2D';
+                const beerEmoji = '\uD83C\uDF7A';
+                const sodaEmoji = '\uD83E\uDD64';
+                const waveEmoji = '\uD83D\uDC4B';
+
+                resultsDiv.innerHTML = `
+                    <p class="text-gray-700"><span class="font-semibold">${meatEmoji} Picanha do Amadei:</span> ${totalPicanha.toFixed(1)} kg</p>
+                    <p class="text-gray-700"><span class="font-semibold">${ribsEmoji} Costela no Sousvide do Amadei:</span> ${totalCostela.toFixed(1)} kg</p>
+                    <p class="text-gray-700"><span class="font-semibold">${sausageBreadEmoji} Pão com Linguiça do Amadei - delícia:</span> ${totalPaoComLinguica.toFixed(0)} unidades</p>
+                    <p class="text-gray-700"><span class="font-semibold">${beerEmoji} Total de cerveja:</span> ${totalBeer.toFixed(1)} litros</p>
+                    <p class="text-gray-700"><span class="font-semibold">${sodaEmoji} Coquinha Zero do Cabral - Fitness:</span> ${totalSoda.toFixed(1)} litros</p>
+                `;
+
+                const text = `Olá! ${waveEmoji}\n\nPara o nosso churrasco, vamos precisar de:\n\n` +
+                             `${meatEmoji} *Picanha do Amadei:* ${totalPicanha.toFixed(1)} kg\n` +
+                             `${ribsEmoji} *Costela no Sousvide do Amadei:* ${totalCostela.toFixed(1)} kg\n` +
+                             `${sausageBreadEmoji} *Pão com Linguiça do Amadei - delícia:* ${totalPaoComLinguica.toFixed(0)} unidades\n` +
+                             `${beerEmoji} *Cerveja:* ${totalBeer.toFixed(1)} litros\n` +
+                             `${sodaEmoji} *Coquinha Zero do Cabral - Fitness:* ${totalSoda.toFixed(1)} litros\n\n` +
+                             `Até lá!`;
+
+                const encodedText = robustEncodeURIComponent(text);
+                const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+                shareButton.href = whatsappUrl;
+            }
+
+            menInput.addEventListener('input', calculateAndShare);
+            womenInput.addEventListener('input', calculateAndShare);
+            childrenInput.addEventListener('input', calculateAndShare);
+
+            // Initial calculation
+            calculateAndShare();
+        </script>
+    </div>
+</body>
+</html>
